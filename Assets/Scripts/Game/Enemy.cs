@@ -12,24 +12,24 @@ public class Enemy : MonoBehaviour
     /// <summary>
     /// Current health of the Enemy.
     /// </summary>
-    [ Header("Gameplay") ]
+    [Header("Gameplay")]
     public float health = 10.0f;
 
     /// <summary>
     /// Current speed of the Enemy.
     /// </summary>
     public float speed = 1.0f;
-    
+
     /// <summary>
     /// Rigid body of the Enemy.
     /// </summary>
     private Rigidbody mRigidBody;
-    
+
     /// <summary>
     /// Trigger of the Enemy.
     /// </summary>
     private BoxCollider mBoxTrigger;
-    
+
     /// <summary>
     /// Collider of the Enemy.
     /// </summary>
@@ -41,7 +41,7 @@ public class Enemy : MonoBehaviour
     private void Awake()
     {
         mRigidBody = GetComponent<Rigidbody>();
-        
+
         // Get the collider and the trigger, making sure we got the correct one.
         var colliders = GetComponents<BoxCollider>();
         mBoxTrigger = colliders[0]; Assert.IsTrue(mBoxTrigger.isTrigger);
@@ -74,6 +74,18 @@ public class Enemy : MonoBehaviour
          *    Use mRigidBody.MovePosition to move the enemy
          * Implement a simple AI, which will head towards the closest player and follow them.
          */
+        GameObject closestPlayer = GameManager.Instance.NearestPlayer(transform.position);
+        if (closestPlayer != null)
+        {
+            Vector3 relativePosition = closestPlayer.transform.position - transform.position;
+
+            mRigidBody.rotation = Quaternion.LookRotation(relativePosition, Vector3.forward);
+            mRigidBody.MovePosition(
+                transform.position +
+                transform.forward * speed * Time.deltaTime
+            );
+        }
+
     }
 
     /// <summary>
@@ -99,17 +111,19 @@ public class Enemy : MonoBehaviour
     {
         // Modify the rigid body to allow collisions on the y axis.
         var colliderCenter = mBoxCollider.center;
-        mBoxCollider.center = new Vector3 {
+        mBoxCollider.center = new Vector3
+        {
             x = colliderCenter.x,
-            y = colliderCenter.y, 
-            z = transform.localScale.y, 
+            y = colliderCenter.y,
+            z = transform.localScale.y,
         };
         var colliderSize = mBoxCollider.size;
-        mBoxCollider.size = new Vector3 {
+        mBoxCollider.size = new Vector3
+        {
             x = colliderSize.x,
-            y = colliderSize.y, 
+            y = colliderSize.y,
             //z = 1.0f / transform.localScale.y, 
-            z = colliderSize.z, 
+            z = colliderSize.z,
         };
     }
 }
